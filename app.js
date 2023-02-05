@@ -133,36 +133,39 @@ const $ = document.querySelector.bind(document)
                     } else {
                         audio.play()
                     }
-                    //PLAY
-                    audio.onplay = function() {
-                        _this.isPlaying=true
-                        player.classList.add('playing')
-                        cdThumbAnimate.play()
-                    }
-                    //PAUSE
-                    audio.onpause = function() {
-                        _this.isPlaying=false
-                        player.classList.remove('playing')
-                        cdThumbAnimate.pause()
-                    }
-                    //Tiến độ bài hát 
-                    audio.ontimeupdate = function() {
-                        if(audio.duration) {
-                            const progressPercent = Math.floor(audio.currentTime / audio.duration * 100)
-                            progress.value = progressPercent
-                        } else {
-
-                        }
-                    }
-                    //Khi tua bài hát 
-                    
-                        progress.onchange = function(e) {
-                        const seekTime = audio.duration/100 * e.target.value
-                        audio.currentTime = seekTime
-                    }
-                    
                 
                 }
+                
+                //Tiến độ bài hát 
+                audio.ontimeupdate = function() {
+                    if(audio.duration) {
+                        const progressPercent = Math.floor(audio.currentTime / audio.duration * 100)
+                        progress.value = progressPercent
+                    } else {
+
+                    }
+                }
+                //Khi tua bài hát 
+                
+                    progress.onchange = function(e) {
+                    const seekTime = audio.duration/100 * e.target.value
+                    audio.currentTime = seekTime
+                }
+
+                
+                //Khi bài hát đang chạy hoặc dừng
+                audio.onplay = function() {
+                    _this.isPlaying=true
+                    player.classList.add('playing')
+                    cdThumbAnimate.play()
+                }
+                
+                audio.onpause = function() {
+                    _this.isPlaying=false
+                    player.classList.remove('playing')
+                    cdThumbAnimate.pause()
+                }
+
                 //Khi bấm prev/next
                 
 
@@ -214,7 +217,26 @@ const $ = document.querySelector.bind(document)
                     _this.isRepeat=!_this.isRepeat
                     repeatBtn.classList.toggle('active', _this.isRepeat)
                 }
-                
+
+                //Click playlist
+                playlist.onclick = function(e) {
+                    const songNode = e.target.closest('.song:not(.active)')
+                    if(songNode || e.target.closest('.option')) {
+                        //Xử lý click vào list
+                        if(songNode) {
+                            // console.log(songNode.getAttribute('data-index'))
+                            _this.currentIndex = Number(songNode.dataset.index)
+                            _this.loadCurrentSong()
+                            audio.play()
+                            _this.render()
+
+                        }
+                        //Xử lý click vào option
+                        if(e.target.closest('.option')) {
+
+                        }
+                    }
+                }
             },  
             
             //Định nghĩa các thuộc tính cho object
@@ -232,7 +254,7 @@ const $ = document.querySelector.bind(document)
             render: function() {
                 const htmls = this.songs.map((song,index) => {
                     return `
-                    <div class="song ${index === this.currentIndex ? 'active' : ''}">
+                    <div class="song ${index === this.currentIndex ? 'active' : ''} " data-index="${index}">
                         <div class="thumb"
                             style="background-image: url('${song.image}')">
                 
@@ -254,7 +276,8 @@ const $ = document.querySelector.bind(document)
             loadCurrentSong: function() {
                 heading.textContent = this.currentSong.name
                 cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`
-                audio.src = this.currentSong.path   
+                audio.src = this.currentSong.path
+                
 
             },
             //Kéo đến bài hát được active 
@@ -309,6 +332,7 @@ const $ = document.querySelector.bind(document)
             
 
             start: function() {
+                
                 //Định nghĩa các thuộc tính cho object
                 this.defineProperties()
 
